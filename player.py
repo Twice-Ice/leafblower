@@ -10,69 +10,78 @@ screensize = pygame.display.get_window_size()
 class Player:
 
 	def __init__(self):
-		self.pos = Rect(0,0,128,128)
+		self.pos = Vector2(0,0)
 		self.rel = Vector2(0,0)
-		self.vel = tuple[0,0]
+		self.vel = Vector2(0,0)
 
 		self.image = pygame.image.load('resources/placeholder.png')
+		self.transformed_image = pygame.transform.rotate(self.image, 0)
 		self.offset = Vector2(self.image.get_rect().topleft) - Vector2(self.image.get_rect().midtop)
 
 		self.newMousePos = Vector2(0,0)
 		self.oldMousePos = Vector2(0,0)
 
 		self.correctionangle = 90
-	
-	def mouseShisse(self):
-		self.newMousePos = pygame.mouse.get_pos()
-		self.oldMousePos = self.newMousePos
 
-	def atan2(y, x):
+		self.mouseVels: list[Vector2] = []
+
+	def atan2(self, y, x):
 		num = math.atan2(y, x) * (180/math.pi)
 		if num > 0:
 			return num
 		else:
 			return 180 + (180 - abs(num))
-
-	def update(self):
 		
+	def mouseMove(self):
+		self.newMousePos = Vector2(pygame.mouse.get_pos())
 
-		self.newMousePos = pygame.mouse.get_pos()
-
-		self.rel = self.newMousePos-self.oldMousePos
-
-		print(self.rel)
+		rel = (self.newMousePos - self.oldMousePos) / delta
+		if len(self.mouseVels) < 8:
+			self.mouseVels.append(rel)
+		else:
+			self.mouseVels.pop(0)
+			self.mouseVels.append(rel)
 		
-		self.pos=self.oldMousePos
-
+		avgVel = Vector2(0, 0)
+		for vel in self.mouseVels:
+			avgVel += vel
+		avgVel /= len(self.mouseVels)
 		self.oldMousePos = self.newMousePos
+		return avgVel
+
+
+	def update(self,delta: float):
+		
+		self.vel = self.mouseMove()
+
+		self.pos += self.vel * delta
+
 		self.draw()
 
 		
 	def draw(self):
 
-		angle = math.degrees(math.atan2(-self.rel.y,self.rel.x)) - self.correctionangle
-
-		transformed_image = pygame.transform.rotate(self.image, angle)
-
-		pygame.math.Vector2.rotate_ip(self.pos,angle)
+		angle = math.degrees(math.atan2(-self.vel.y,self.vel.x)) - self.correctionangle
 		
-		screen.blit(transformed_image, self.newMousePos)
+		if abs(self.vel.x) > 1 and abs(self.vel.y) > 1:
+			self.transformed_image = pygame.transform.rotate(self.image, angle)
+		
+		screen.blit(self.transformed_image, self.newMousePos)
 		#pygame.draw.circle(screen, (255,255,240),self.pos,50)
 
 
 guy = Player()
 clock = pygame.time.Clock()
 bye = False
-guy.mouseShisse()
 
 while bye == False:
-	clock.tick(60)
+	delta = clock.tick(60) / 1000
 	screen.fill((0,0,0))
 	for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				bye = True
 
-	guy.update()
+	guy.update(delta)
 
 
 	pygame.display.flip()

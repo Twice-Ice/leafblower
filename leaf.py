@@ -1,12 +1,17 @@
 import pygame
 import random
 import math
+from pygame import mixer
 from player import Player
 #ehh I'll import player later. I think I'm just gonna play this easy.
 pygame.init
 
-screenX = 800
-screenY = 800
+
+#
+
+
+screenX = 1800
+screenY = 900
 
 #creates game screen and caption
 screen = pygame.display.set_mode((screenX, screenY))
@@ -70,13 +75,13 @@ class leafSpawner:
 		for i in range(leaves): #creates a 2d list containing each leaf.
 			tempX = 0
 			tempY = 10
-			self.leaves.append([random.randint(0,screenX) + tempX, random.randint(0,screenY) + tempY, 0, 0, self.STARTING_SPEED]) #random.randint(0, screenX), random.randint(0, screenY), 0, 0]) #xpos, ypos, xvelo, yvelo
+			self.leaves.append([ random.randint(0,screenX) + tempX, random.randint(0,screenY)+ tempY, 0, 0, self.STARTING_SPEED]) #random.randint(0, screenX), random.randint(0, screenY), 0, 0]) #xpos, ypos, xvelo, yvelo
 
 	def draw(self, i):
 		if i == 1:
-			pygame.draw.circle(screen, (255, 0, 0), (self.leaves[i][X], self.leaves[i][Y]), 5)
+			pygame.draw.circle(screen, (255, 0, 0), (self.leaves[i][X], self.leaves[i][Y]), 2)
 		else:
-			pygame.draw.circle(screen, (0, 255, 0), (self.leaves[i][X], self.leaves[i][Y]), 5)
+			pygame.draw.circle(screen, (0, 255, 0), (self.leaves[i][X], self.leaves[i][Y]), 2)
 
 	def update(self):
 		for i in range(len(self.leaves)): #goes through each leaf in the leaves list.
@@ -87,11 +92,10 @@ class leafSpawner:
 			#print()
 
 	def applyPhysics(self, i):
-		size = 128
+		size = 144
 		for j in range(len(leafBlowers)):
-			leafDistance = abs(math.sqrt((guy.centerpos.x - self.leaves[i][X]) ** 2 + abs(guy.centerpos.y - self.leaves[i][Y]) ** 2))
-			#leafDistance = abs(math.sqrt((leafBlowers[j].xpos - self.leaves[i][X]) ** 2 + abs(leafBlowers[j].ypos - self.leaves[i][Y]) ** 2))
-			# leafDistance = abs(math.sqrt((guy.centerpos.x - self.leaves[i][X]) ** 2 + abs(guy.centerpos.y - self.leaves[i][Y]) ** 2))
+			leafDistance = math.sqrt((guy.centerpos.x - self.leaves[i][X]) ** 2 + abs(guy.centerpos.y - self.leaves[i][Y]) ** 2)
+			
 			if leafDistance == 0:
 				leafDistance = .01
 				self.leaves[i][X] += 0.01
@@ -99,8 +103,7 @@ class leafSpawner:
 
 				#Finds the angle between leaf & leafblower
 				angle = math.atan2(float(self.leaves[i][Y] - guy.centerpos.y), float(self.leaves[i][X] - guy.centerpos.x))
-				# angle = math.atan2(float(self.leaves[i][Y] - leafBlowers[j].ypos), float(self.leaves[i][X] - leafBlowers[j].xpos))
-				# angle = math.degrees(math.atan2(guy.centerpos.x - self.leaves[i][X], guy.centerpos.y - self.leaves[i][Y]))
+
 
 				#Convert that angle to coordinates, extend to the correct size so that it picks a point along the leafblower's bounds
 				endX = int((math.cos(angle) * size) + guy.centerpos.x)
@@ -130,8 +133,8 @@ class leafSpawner:
 				self.drag(i)
 
 		#moves the leaf
-		self.leaves[i][X] += self.leaves[i][DELTA_X] * 2
-		self.leaves[i][Y] += self.leaves[i][DELTA_Y] * 2
+		self.leaves[i][X] += self.leaves[i][DELTA_X] * 10
+		self.leaves[i][Y] += self.leaves[i][DELTA_Y] * 10
 
 		if self.leaves[i][X] < 0:
 			self.leaves[i][X] += screenX
@@ -162,15 +165,8 @@ class leafSpawner:
 			self.leaves[i][DELTA_Y] += dragVal
 
 #SEBASTIAN WILL FIX THIS LATER
-def draw():
-	angle = math.degrees(math.atan2(-guy.vel.y,guy.vel.x)) - guy.correctionangle
-		
-	if abs(guy.vel.x) > 1 and abs(guy.vel.y) > 1:
-		guy.transformed_image = pygame.transform.rotate(guy.image, angle)
-		
-	screen.blit(guy.transformed_image, guy.newMousePos)
 
-leeevs = leafSpawner(3000)
+leeevs = leafSpawner(2000)
 
 #BEGIN GAME LOOP######################################################
 while not doExit:
@@ -189,7 +185,7 @@ while not doExit:
 	leeevs.update()
 	guy.update(delta)
 
-	draw()
+	screen.blit(guy.transformed_image, (guy.newMousePos.x-72,guy.newMousePos.y-72))
 
 
 	pygame.display.flip() #update graphics each game loop

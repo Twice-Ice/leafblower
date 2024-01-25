@@ -54,11 +54,16 @@ class Player:
 		self.vel = self.mouseMove(delta)
 		
 		self.pos += self.vel * delta 
-		self.centerpos.x = self.newMousePos.x+64
-		self.centerpos.y = self.newMousePos.y+64
+		self.centerpos.x = self.newMousePos.x
+		self.centerpos.y = self.newMousePos.y
 
-		#self.draw()
+		self.draw()
 
+	def draw(self):
+		angle = math.degrees(math.atan2(-self.vel.y,self.vel.x)) - self.correctionangle
+		
+		if abs(self.vel.x) > 1 and abs(self.vel.y) > 1:
+			self.transformed_image = pygame.transform.rotate(self.image, angle)
 		
 	#def draw(self):
 #
@@ -71,7 +76,7 @@ class Player:
 	#	#pygame.draw.circle(screen, (255,255,240),self.pos,50)
 
 
-#guy = Player()
+#self = Player()
 #clock = pygame.time.Clock()
 #bye = False
 #
@@ -82,7 +87,7 @@ class Player:
 #			if event.type == pygame.QUIT:
 #				bye = True
 #
-#	guy.update(delta)
+#	self.update(delta)
 #
 #
 #	pygame.display.flip()

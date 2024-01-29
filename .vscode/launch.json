@@ -8,7 +8,7 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "leaf.py", // change to main.py later
+            "program": "main.py", // change to main.py later
             "console": "integratedTerminal",
             "justMyCode": true
         }

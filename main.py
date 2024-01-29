@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+from pygame.math import Vector2
 from const import SCREEN_X, SCREEN_Y
 from leaf import LeafSpawner
 from player import Player
@@ -24,7 +25,7 @@ def updateTicker():
 		ticker = 0
 		
 guy = Player()
-leeevs = LeafSpawner(7000)
+leeevs = LeafSpawner(2000)
 
 #temporary player class containing positions because player class doesn't work right now.
 class temp:
@@ -34,9 +35,13 @@ class temp:
 		self.size = size
 
 #adds the temp class to the leafBlowers (entities) list.
-leeevs.leafBlowers.append(temp(SCREEN_X/2, SCREEN_Y/2, 200)) #xpos, ypos, size
+leeevs.leafBlowers.append([guy.centerpos,guy.size]) #xpos, ypos, size
+#for i in range(20):
+#	leeevs.leafBlowers.append([Vector2(random.randint(0, SCREEN_X), random.randint(0, SCREEN_Y)), 100])
 
-		
+center = pygame.display.get_window_size()
+pygame.mouse.set_pos(center[0]//2,center[1]//2)		
+
 #BEGIN GAME LOOP######################################################
 while not doExit:
 	
@@ -44,17 +49,17 @@ while not doExit:
 	updateTicker()
 	screen.fill((0,0,0))
 
-	pygame.draw.circle(screen, (255, 255, 255), (SCREEN_X/2, SCREEN_Y/2), 1)
 
 	#pygame's way of listening for events (key presses, mouse clicks, etc)
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			doExit = True #lets you quit program
 
-	leeevs.update()
-	guy.update(delta)
-
-	screen.blit(guy.transformed_image, (guy.newMousePos.x-72,guy.newMousePos.y-72))
+	guy.update(delta,screen)
+	leeevs.update(screen)
+	
+	
+	#screen.blit(guy.transformed_image, (guy.newMousePos.x-72,guy.newMousePos.y-72))
 
 
 	pygame.display.flip() #update graphics each game loop

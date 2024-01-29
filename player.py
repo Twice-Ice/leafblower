@@ -9,8 +9,8 @@ pygame.init()
 class Player:
 
 	def __init__(self):
+		self.size = 228
 		self.pos = Vector2(0,0)
-		self.rel = Vector2(0,0)
 		self.vel = Vector2(0,0)
 		self.centerpos = Vector2(0,0)
 		self.image = pygame.image.load('resources/placeholder.png')
@@ -48,22 +48,33 @@ class Player:
 		self.oldMousePos = self.newMousePos
 		return avgVel
 
-
-	def update(self,delta: float):
-		
+	def move(self, delta: float):
 		self.vel = self.mouseMove(delta)
 		
 		self.pos += self.vel * delta 
 		self.centerpos.x = self.newMousePos.x
 		self.centerpos.y = self.newMousePos.y
 
-		self.draw()
+	def update(self,delta: float, screen):
 
-	def draw(self):
+
+		self.move(delta)
+
+		self.draw(screen)
+
+	def rotate(self):
 		angle = math.degrees(math.atan2(-self.vel.y,self.vel.x)) - self.correctionangle
 		
 		if abs(self.vel.x) > 1 and abs(self.vel.y) > 1:
 			self.transformed_image = pygame.transform.rotate(self.image, angle)
+
+
+	def draw(self,screen):
+		self.rotate()
+
+		screen.blit(self.transformed_image, (self.newMousePos.x-72,self.newMousePos.y-72))#, (128*1, 1, 128, 128))
+
+
 		
 	#def draw(self):
 #

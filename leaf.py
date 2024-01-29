@@ -4,48 +4,15 @@ import math
 from const import SCREEN_X, SCREEN_Y
 from pygame import mixer
 from player import Player
+from pygame.math import Vector2
 pygame.init
 
-#creates game screen and caption
-screen = pygame.display.set_mode((SCREEN_X, SCREEN_Y))
-pygame.display.set_caption("leaves")
-
-#game variables
-doExit = False #variable to quit out of game loop
-clock = pygame.time.Clock() #sets up a game clock to regulate game speed
-ticker = 0
-
-#constants because why not friend.
+#constants because why not.
 X = 0
 Y = 1
 DELTA_X = 2
 DELTA_Y = 3
 SPEED = 4
-
-def updateTicker():
-	global ticker
-	if ticker < 60:
-		ticker += 1
-	else:
-		ticker = 0
-
-#a better function for telling the angle between two points
-#input (y1 - y2, x1 - x2) in order to get two points working.
-
-# def atan2(y, x):
-#     def adjustAngle(angle):
-#         if angle + 90 > 360:
-#             return angle - 270 # + 90 - 360
-#         else:
-#             return angle + 90
-#     num = math.atan2(y, x) * (180/math.pi)
-#     if num > 0:
-#         #print("atan2 = ", adjustAngle(num), end= ", ")
-#         return adjustAngle(num)
-#     else:
-#         #print("atan2 = ", adjustAngle(180 + (180 - abs(num))), end= ", ")
-#         return adjustAngle(180 + (180 - abs(num)))
-
 
 def tpd(num):
 	return math.floor(num*100)/100
@@ -67,38 +34,37 @@ class LeafSpawner:
 			tempY = 10
 			self.leaves.append([ random.randint(0,SCREEN_X) + tempX, random.randint(0,SCREEN_Y)+ tempY, 0, 0, self.STARTING_SPEED]) #random.randint(0, SCREEN_X), random.randint(0, SCREEN_Y), 0, 0]) #xpos, ypos, xvelo, yvelo
 
-	def draw(self, i):
+	def draw(self, i, screen):
 		if i == 1:
-			pygame.draw.circle(screen, (255, 0, 0), (self.leaves[i][X], self.leaves[i][Y]), 2)
+			pygame.draw.circle(screen, (255, 0, 0), (self.leaves[i][X], self.leaves[i][Y]), 6)
 		else:
-			pygame.draw.circle(screen, (0, 255, 0), (self.leaves[i][X], self.leaves[i][Y]), 2)
+			pygame.draw.circle(screen, (0, 255, 0), (self.leaves[i][X], self.leaves[i][Y]), 6)
 
-	def update(self):
+	def update(self, screen):
+		print(self.leaves[1])
 		for i in range(len(self.leaves)): #goes through each leaf in the leaves list.
-			self.applyPhysics(i)
-			self.draw(i)
-			# for i in range(len(self.leaves[0])):
-				#print(math.floor(self.leaves[0][i] * 100)/100, end = ", ")
-			#print()
+			if self.leaves[i][X] < SCREEN_X + 10 and self.leaves[i][X] > -10 and self.leaves[i][Y] < SCREEN_Y + 10 and self.leaves[i][Y] > -10: # doesn't update the leaf if it's outside of the screen.
+				self.applyPhysics(i)
+				self.draw(i, screen)
 
 	def applyPhysics(self, i):
 		for j in range(len(self.leafBlowers)):
-			leafDistance = math.sqrt((self.leafBlowers[j].xpos - self.leaves[i][X]) ** 2 + abs(self.leafBlowers[j].ypos - self.leaves[i][Y]) ** 2)
+			leafDistance = math.sqrt((self.leafBlowers[j][0].x - self.leaves[i][X]) ** 2 + abs(self.leafBlowers[j][0].y - self.leaves[i][Y]) ** 2)
 			# leafDistance = math.sqrt((guy.centerpos.x - self.leaves[i][X]) ** 2 + abs(guy.centerpos.y - self.leaves[i][Y]) ** 2)
 			
 			if leafDistance == 0:
 				leafDistance = .01
 				self.leaves[i][X] += 0.01
-			if leafDistance <= self.leafBlowers[j].size: #checks if the leaf is in the range of the current leafblower
+			if leafDistance <= self.leafBlowers[j][1]: #checks if the leaf is in the range of the current leafblower
 
 				#Finds the angle between leaf & leafblower
-				angle = math.atan2(float(self.leaves[i][Y] - self.leafBlowers[j].ypos), float(self.leaves[i][X] - self.leafBlowers[j].xpos))
+				angle = math.atan2(float(self.leaves[i][Y] - self.leafBlowers[j][0].y), float(self.leaves[i][X] - self.leafBlowers[j][0].x))
 				# angle = math.atan2(float(self.leaves[i][Y] - guy.centerpos.y), float(self.leaves[i][X] - guy.centerpos.x))
 
 
 				#Convert that angle to coordinates, extend to the correct size so that it picks a point along the leafblower's bounds
-				endX = int((math.cos(angle) * self.leafBlowers[j].size) + self.leafBlowers[j].xpos)
-				endY = int((math.sin(angle) * self.leafBlowers[j].size) + self.leafBlowers[j].ypos)
+				endX = int((math.cos(angle) * self.leafBlowers[j][1]) + self.leafBlowers[j][0].x)
+				endY = int((math.sin(angle) * self.leafBlowers[j][1]) + self.leafBlowers[j][0].y)
 				# endX = int((math.cos(angle) * size) + guy.centerpos.x)
 				# endY = int((math.sin(angle) * size) + guy.centerpos.y)
 
@@ -118,75 +84,37 @@ class LeafSpawner:
 				self.leaves[i][DELTA_X] = xDir * self.leaves[i][SPEED]
 				self.leaves[i][DELTA_Y] = yDir * self.leaves[i][SPEED]
 			   # pygame.draw.line(screen, (255, 0, 0), (self.leafBlowers[j].xpos, self.leafBlowers[j].ypos), (self.))
-			else:
+			#else:
 				#resets speed
-				self.leaves[i][SPEED] = self.STARTING_SPEED
+				#self.leaves[i][SPEED] = self.STARTING_SPEED
 				
 				#applies drag
-				self.drag(i)
+		self.drag(i)
 
 		#moves the leaf
-		self.leaves[i][X] += self.leaves[i][DELTA_X] * 10
-		self.leaves[i][Y] += self.leaves[i][DELTA_Y] * 10
+		self.leaves[i][X] += self.leaves[i][DELTA_X]
+		self.leaves[i][Y] += self.leaves[i][DELTA_Y]
 
-		if self.leaves[i][X] < 0:
-			self.leaves[i][X] += SCREEN_X
-		elif self.leaves[i][X] > SCREEN_X:
-			self.leaves[i][X] -= SCREEN_X
+		#if self.leaves[i][X] < 0:
+		#	self.leaves[i][X] += SCREEN_X
+		#elif self.leaves[i][X] > SCREEN_X:
+		#	self.leaves[i][X] -= SCREEN_X
 
-		if self.leaves[i][Y] < 0:
-			self.leaves[i][Y] += SCREEN_Y
-		elif self.leaves[i][Y] > SCREEN_Y:
-			self.leaves[i][Y] -= SCREEN_Y
+		#if self.leaves[i][Y] < 0:
+		#	self.leaves[i][Y] += SCREEN_Y
+		#elif self.leaves[i][Y] > SCREEN_Y:
+		#	self.leaves[i][Y] -= SCREEN_Y
 
 	def drag(self, i):
-		dragVal = .4
+		dragVal = 0.3
+		minSpeed = 0.1
 
-		if abs(self.leaves[i][DELTA_X]) <= dragVal:
+		if abs(self.leaves[i][DELTA_X]) <= minSpeed:
 			self.leaves[i][DELTA_X] = 0
-		elif self.leaves[i][DELTA_X] > 0:
-			self.leaves[i][DELTA_X] -= dragVal
-		elif self.leaves[i][DELTA_X] < 0:
-			self.leaves[i][DELTA_X] += dragVal
+		else:
+			self.leaves[i][DELTA_X] += dragVal * ((self.leaves[i][DELTA_X]/abs(self.leaves[i][DELTA_X])) * -1)
 
-
-		if abs(self.leaves[i][DELTA_Y]) <= dragVal:
+		if abs(self.leaves[i][DELTA_Y]) <= minSpeed:
 			self.leaves[i][DELTA_Y] = 0
-		elif self.leaves[i][DELTA_Y] > 0:
-			self.leaves[i][DELTA_Y] -= dragVal
-		elif self.leaves[i][DELTA_Y] < 0:
-			self.leaves[i][DELTA_Y] += dragVal
-
-leeevs = LeafSpawner(2000)
-
-#adds the temp class to the self.leafBlowers (entities) list.
-leeevs.leafBlowers.append(temp(SCREEN_X/2, SCREEN_Y/2))
-leeevs.leafBlowers.append(temp(200, 200))
-
-# #SEBASTIAN WILL FIX THIS LATER
-
-
-# #BEGIN GAME LOOP######################################################
-# while not doExit:
-	
-# 	delta = clock.tick(60) / 1000 #FPS (frames per second)
-# 	updateTicker()
-# 	screen.fill((0,0,0))
-
-# 	pygame.draw.circle(screen, (255, 255, 255), (SCREEN_X/2, SCREEN_Y/2), 1)
-
-# 	#pygame's way of listening for events (key presses, mouse clicks, etc)
-# 	for event in pygame.event.get():
-# 		if event.type == pygame.QUIT:
-# 			doExit = True #lets you quit program
-
-# 	leeevs.update()
-# 	# guy.update(delta)
-
-# 	# screen.blit(guy.transformed_image, (guy.newMousePos.x-72,guy.newMousePos.y-72))
-
-
-# 	pygame.display.flip() #update graphics each game loop
-
-# #END GAME LOOP#######################################################
-# pygame.quit()
+		else:
+			self.leaves[i][DELTA_Y] += dragVal * ((self.leaves[i][DELTA_Y]/abs(self.leaves[i][DELTA_Y])) * -1)

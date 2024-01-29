@@ -78,7 +78,7 @@ class LeafSpawner:
 				yDir = yDistance/magnitude
 				xDir = xDistance/magnitude
 
-				self.leaves[i][SPEED] += 0.5
+				self.leaves[i][SPEED] += 0.64
 
 				#sets the velocities
 				self.leaves[i][DELTA_X] = xDir * self.leaves[i][SPEED]
@@ -106,8 +106,8 @@ class LeafSpawner:
 		#	self.leaves[i][Y] -= SCREEN_Y
 
 	def drag(self, i):
-		dragVal = 0.3
-		minSpeed = 0.1
+		dragVal = 0.6
+		minSpeed = 0.2
 
 		if abs(self.leaves[i][DELTA_X]) <= minSpeed:
 			self.leaves[i][DELTA_X] = 0

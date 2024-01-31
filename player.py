@@ -1,7 +1,7 @@
 import pygame
 from pygame.math import Vector2
 import math
-from const import SCREEN_X
+from globals import SCREEN_X, SCREEN_Y
 from pygame import Rect
 pygame.init()
 
@@ -10,7 +10,8 @@ pygame.init()
 class Player:
 
 	def __init__(self):
-		self.size = 128+80
+		self.size = SCREEN_X*2#128+80
+		self.power = 7.5 #.2
 		self.pos = Vector2(0,0)
 		self.vel = Vector2(0,0)
 		self.centerpos = Vector2(0,0)

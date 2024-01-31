@@ -18,7 +18,7 @@ clock = pygame.time.Clock() #sets up a game clock to regulate game speed
 
 guy = Player()
 leeevs = LeafSpawner(2000)
-leafTicker = Ticker(float(3)) #x seconds between ticks
+leafTicker = Ticker(float(.025)) #x seconds between ticks
 money = MoneyCounter()
 moneyDisplay = TextDisplay(money.val, 10, 10)
 

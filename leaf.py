@@ -122,8 +122,9 @@ class LeafSpawner:
 		self.frameMoney += 1
 
 	def respawnLeaves(self):
+		adjustor = random.randint(1, 4)
 		for i in range(len(self.leaves)): #checks all the leaves
-			if (self.leaves[i][X] == -69 and self.leaves[i][Y] == -420) or i % 4 == 0: #if the leaf is collected or every 4th leaf, it is moved to a random pos and it's velo is reset.
+			if (self.leaves[i][X] == -69 and self.leaves[i][Y] == -420) or (i + adjustor) % 4 == 0: #if the leaf is collected or every 4th leaf, it is moved to a random pos and it's velo is reset.
 				#it's every 4th leaf in order to avoid clumping, or all the leaves being out of reach of the player. this allows for afk time.
 				self.leaves[i][X] = random.randint(0, SCREEN_X)
 				self.leaves[i][Y] = random.randint(0, SCREEN_Y)

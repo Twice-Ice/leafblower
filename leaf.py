@@ -30,9 +30,9 @@ class LeafSpawner:
 
 	def draw(self, leafPos, screen):
 		if leafPos == 1: #since the leaves are autumn colors now, this will just be white.
-			pygame.draw.circle(screen, (255, 255, 255), (self.leaves[leafPos][X], self.leaves[leafPos][Y]), 6)
+			pygame.draw.circle(screen, (255, 255, 255), (self.leaves[leafPos][X], self.leaves[leafPos][Y]), 8)
 		else:
-			pygame.draw.circle(screen, self.leaves[leafPos][COLOR], (self.leaves[leafPos][X], self.leaves[leafPos][Y]), 6)
+			pygame.draw.circle(screen, self.leaves[leafPos][COLOR], (self.leaves[leafPos][X], self.leaves[leafPos][Y]), 8)
 
 	def update(self, screen):
 		self.frameMoney = 0  #resets frame money every frame.
@@ -124,10 +124,10 @@ class LeafSpawner:
 	def respawnLeaves(self):
 		adjustor = random.randint(1, 4)
 		for i in range(len(self.leaves)): #checks all the leaves
-			if (self.leaves[i][X] == -69 and self.leaves[i][Y] == -420) or (i + adjustor) % 4 == 0: #if the leaf is collected or every 4th leaf, it is moved to a random pos and it's velo is reset.
+			if (self.leaves[i][X] == -69 and self.leaves[i][Y] == -420): #or (i + adjustor) % 4 == 0: #if the leaf is collected or every 4th leaf, it is moved to a random pos and it's velo is reset.
 				#it's every 4th leaf in order to avoid clumping, or all the leaves being out of reach of the player. this allows for afk time.
-				self.leaves[i][X] = random.randint(0, SCREEN_X)
-				self.leaves[i][Y] = random.randint(0, SCREEN_Y)
+				self.leaves[i][X] = random.randint(50, SCREEN_X-50)
+				self.leaves[i][Y] = random.randint(50, SCREEN_Y-50)
 				self.leaves[i][DELTA_X] = 0
 				self.leaves[i][DELTA_Y] = 0
 				self.leaves[i][SPEED] = 0

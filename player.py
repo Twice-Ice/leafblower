@@ -10,8 +10,8 @@ pygame.init()
 class Player:
 
 	def __init__(self):
-		self.size = SCREEN_X*2#128+80
-		self.power = 7.5 #.2
+		self.size = 128+80
+		self.power = .2
 		self.pos = Vector2(0,0)
 		self.vel = Vector2(0,0)
 		self.centerpos = Vector2(0,0)

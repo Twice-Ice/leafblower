@@ -1,7 +1,7 @@
 import pygame
 import random
 import math
-from globals import SCREEN_X, SCREEN_Y
+from globals import SCREEN_X, SCREEN_Y, FPS
 from miscClasses import MoneyCounter
 from pygame import mixer
 from player import Player
@@ -19,10 +19,11 @@ COLOR = 5
 # guy = Player()
 class LeafSpawner:
 	STARTING_SPEED = 0.1
-	def __init__(self, leaves):
+	def __init__(self, leaves,scale):
 		self.frameMoney = 0
 		self.leafBlowers = []
 		self.leaves = [] #this list contains information regarding every single leaf in the game.
+		self.scale = scale
 		for i in range(leaves): #creates a 2d list containing each leaf.
 			tempX = 0
 			tempY = 10
@@ -30,21 +31,22 @@ class LeafSpawner:
 
 	def draw(self, leafPos, screen):
 		if leafPos == 1: #since the leaves are autumn colors now, this will just be white.
-			pygame.draw.circle(screen, (255, 255, 255), (self.leaves[leafPos][X], self.leaves[leafPos][Y]), 8)
+			pygame.draw.circle(screen, (255, 255, 255), (self.leaves[leafPos][X], self.leaves[leafPos][Y]), 8*self.scale)
 		else:
-			pygame.draw.circle(screen, self.leaves[leafPos][COLOR], (self.leaves[leafPos][X], self.leaves[leafPos][Y]), 8)
+			pygame.draw.circle(screen, self.leaves[leafPos][COLOR], (self.leaves[leafPos][X], self.leaves[leafPos][Y]), 8*self.scale)
 
-	def update(self, screen):
+	def update(self, delta, screen):
+		#delta is calculated using the framerate. Applying delta to (for example) movement, means the leaves will stay the same speed even if fps drops, rather than slowing down
 		self.frameMoney = 0  #resets frame money every frame.
 		# print(self.leaves[1])
 		for leafPos in range(len(self.leaves)): #goes through each leaf in the leaves list.
 			if self.leaves[leafPos][X] < SCREEN_X + 10 and self.leaves[leafPos][X] > -10 and self.leaves[leafPos][Y] < SCREEN_Y + 10 and self.leaves[leafPos][Y] > -10: # doesn't update the leaf if it's outside of the screen.
-				self.applyPhysics(leafPos)
+				self.applyPhysics(leafPos,delta)
 				self.draw(leafPos, screen) #only draws the leaf if it's on screen.
 			elif self.leaves[leafPos][X] != -69 and self.leaves[leafPos][Y] != -420: #collects the leaf (assuming it's not already collected), because it's not on screen.
 				self.collectLeaf(leafPos)
 
-	def applyPhysics(self, leafPos):
+	def applyPhysics(self, leafPos,delta):
 		for j in range(len(self.leafBlowers)): #cycles through all leafblowers
 			#calculates hypotenuse (distance) between the leafblower and the leaf
 			leafDistance = math.sqrt((self.leafBlowers[j][0].x - self.leaves[leafPos][X]) ** 2 + abs(self.leafBlowers[j][0].y - self.leaves[leafPos][Y]) ** 2)
@@ -73,15 +75,15 @@ class LeafSpawner:
 				self.leaves[leafPos][SPEED] += self.leafBlowers[j][2] #default power = .2 (?)
 
 				#sets the velocities
-				self.leaves[leafPos][DELTA_X] = xDir * self.leaves[leafPos][SPEED]
-				self.leaves[leafPos][DELTA_Y] = yDir * self.leaves[leafPos][SPEED]
+				self.leaves[leafPos][DELTA_X] = (xDir * self.leaves[leafPos][SPEED])*self.scale
+				self.leaves[leafPos][DELTA_Y] = (yDir * self.leaves[leafPos][SPEED])*self.scale
 		
 		#applies drag
 		self.drag(leafPos)
 
 		#moves the leaf
-		self.leaves[leafPos][X] += self.leaves[leafPos][DELTA_X]
-		self.leaves[leafPos][Y] += self.leaves[leafPos][DELTA_Y]
+		self.leaves[leafPos][X] += self.leaves[leafPos][DELTA_X] / delta
+		self.leaves[leafPos][Y] += self.leaves[leafPos][DELTA_Y] / delta
 
 		#screen wrapping stuff because funny inifinite pain with leaves go brrrrr
 		#if self.leaves[leafPos][X] < 0:
@@ -106,13 +108,13 @@ class LeafSpawner:
 			if abs(self.leaves[leafPos][DELTA_X]) <= minSpeed:
 				self.leaves[leafPos][DELTA_X] = 0
 			else:
-				self.leaves[leafPos][DELTA_X] += dragVal * ((self.leaves[leafPos][DELTA_X]/abs(self.leaves[leafPos][DELTA_X])) * -1)
+				self.leaves[leafPos][DELTA_X] += (dragVal * ((self.leaves[leafPos][DELTA_X]/abs(self.leaves[leafPos][DELTA_X])) * -1))*self.scale
 
 		if self.leaves[leafPos][DELTA_Y] != 0:
 			if abs(self.leaves[leafPos][DELTA_Y]) <= minSpeed:
 				self.leaves[leafPos][DELTA_Y] = 0
 			else:
-				self.leaves[leafPos][DELTA_Y] += dragVal * ((self.leaves[leafPos][DELTA_Y]/abs(self.leaves[leafPos][DELTA_Y])) * -1)
+				self.leaves[leafPos][DELTA_Y] += (dragVal * ((self.leaves[leafPos][DELTA_Y]/abs(self.leaves[leafPos][DELTA_Y])) * -1))*self.scale
 
 	def collectLeaf(self, leafPos):
 		#the leaf goes to an arbitrary position that would otherwise be impossible to reach for the leaf.

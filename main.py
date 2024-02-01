@@ -7,18 +7,22 @@ from globals import SCREEN_X, SCREEN_Y, FPS
 from leaf import LeafSpawner
 from player import Player
 from miscClasses import Temp, Ticker, MoneyCounter, TextDisplay
-pygame.init
+pygame.init()
 
 #creates game screen and caption
-screen = pygame.display.set_mode((SCREEN_X, SCREEN_Y), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((SCREEN_X, SCREEN_Y))#, pygame.FULLSCREEN)
 pygame.display.set_caption("leaves")
+
+#calculate scale
+scale = (SCREEN_Y/1080)
 
 #game variables
 doExit = False #variable to quit out of game loop
 clock = pygame.time.Clock() #sets up a game clock to regulate game speed
 
-guy = Player()
-leeevs = LeafSpawner(3000)
+guy = Player(scale)
+leeevs = LeafSpawner(3000,scale)
+
 leafTicker = Ticker(float(5)) #x seconds between ticks
 money = MoneyCounter()
 moneyDisplay = TextDisplay(money.val, 10, 10)
@@ -36,9 +40,10 @@ pygame.mouse.set_pos(center[0]//2,center[1]//2)
 
 #game loop
 while not doExit:
-	delta = clock.tick(FPS) / 1000 #FPS (frames per second)
+	delta =  28 / clock.tick(FPS) #/ 1000 #FPS (frames per second)
 	screen.fill((0,0,0))
-
+	#for i in range(700):
+	#	print(delta)
 	if leafTicker.update(): #updates the leaf ticker, the update function returns T/F if the ticker has activated or not.
 		leeevs.respawnLeaves() #if True, all leaves "respawn". See more in the function def.
 
@@ -49,7 +54,7 @@ while not doExit:
 
 	#update functions
 	guy.update(delta,screen)
-	leeevs.update(screen)
+	leeevs.update(delta, screen)
 	money.val += leeevs.frameMoney
 	moneyDisplay.update(screen, money.val)
 	testButton.update(screen, Vector2(pygame.mouse.get_pos()))

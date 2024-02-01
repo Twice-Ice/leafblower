@@ -108,13 +108,13 @@ class LeafSpawner:
 			if abs(self.leaves[leafPos][DELTA_X]) <= minSpeed:
 				self.leaves[leafPos][DELTA_X] = 0
 			else:
-				self.leaves[leafPos][DELTA_X] += (dragVal * ((self.leaves[leafPos][DELTA_X]/abs(self.leaves[leafPos][DELTA_X])) * -1))*self.scale
+				self.leaves[leafPos][DELTA_X] += (dragVal * ((self.leaves[leafPos][DELTA_X]/abs(self.leaves[leafPos][DELTA_X])) * -1))#*self.scale
 
 		if self.leaves[leafPos][DELTA_Y] != 0:
 			if abs(self.leaves[leafPos][DELTA_Y]) <= minSpeed:
 				self.leaves[leafPos][DELTA_Y] = 0
 			else:
-				self.leaves[leafPos][DELTA_Y] += (dragVal * ((self.leaves[leafPos][DELTA_Y]/abs(self.leaves[leafPos][DELTA_Y])) * -1))*self.scale
+				self.leaves[leafPos][DELTA_Y] += (dragVal * ((self.leaves[leafPos][DELTA_Y]/abs(self.leaves[leafPos][DELTA_Y])) * -1))#*self.scale
 
 	def collectLeaf(self, leafPos):
 		#the leaf goes to an arbitrary position that would otherwise be impossible to reach for the leaf.

@@ -3,25 +3,27 @@ import random
 import math
 from buttons import Button
 from pygame.math import Vector2
-from globals import SCREEN_X, SCREEN_Y, FPS
-from leaf import LeafSpawner
+from globals import screen_X, screen_Y, FPS, FULLSCREEN_X, FULLSCREEN_Y
+from leaf import LeafSpawner, Blower
 from player import Player
 from miscClasses import Temp, Ticker, MoneyCounter, TextDisplay
 pygame.init()
 
 #creates game screen and caption
-screen = pygame.display.set_mode((SCREEN_X, SCREEN_Y))#, pygame.FULLSCREEN)
+X = 1
+Y = 1
+screen = pygame.display.set_mode((screen_X, screen_Y), pygame.SCALED, vsync=1)#, pygame.FULLSCREEN)
 pygame.display.set_caption("leaves")
 
 #calculate scale
-scale = (SCREEN_Y/1080)
+scale = (screen_Y/720)
 
 #game variables
 doExit = False #variable to quit out of game loop
 clock = pygame.time.Clock() #sets up a game clock to regulate game speed
 
 guy = Player(scale)
-leeevs = LeafSpawner(3000,scale)
+leeevs = LeafSpawner(700,scale)
 
 leafTicker = Ticker(float(5)) #x seconds between ticks
 money = MoneyCounter()
@@ -31,16 +33,17 @@ def tempFunc():
 testButton = Button(10, 10, 10, 10, tempFunc)
 
 #adds the player to the leafBlowers (entities) list.
-leeevs.leafBlowers.append([guy.centerpos, guy.size, guy.power]) #Vector2(xpos, ypos), size
+leeevs.leafBlowers.append(Blower(guy.centerpos, guy.size, guy.power)) #Vector2(xpos, ypos), size
 # for i in range(20):
-# 	leeevs.leafBlowers.append([Vector2(random.randint(0, SCREEN_X), random.randint(0, SCREEN_Y)), 100])
+# 	leeevs.leafBlowers.append([Vector2(random.randint(0, screen_X), random.randint(0, screen_Y)), 100])
 
 center = pygame.display.get_window_size()
 pygame.mouse.set_pos(center[0]//2,center[1]//2)		
+pygame.mouse.set_visible(False)
 
 #game loop
 while not doExit:
-	delta =  28 / clock.tick(FPS) #/ 1000 #FPS (frames per second)
+	delta = clock.tick(FPS) / 1000 #FPS (frames per second)
 	screen.fill((0,0,0))
 	#for i in range(700):
 	#	print(delta)
@@ -60,4 +63,9 @@ while not doExit:
 	testButton.update(screen, Vector2(pygame.mouse.get_pos()))
 
 	pygame.display.flip() #update graphics each game loop
+
+	#screen = pygame.display.set_mode((X, Y))
+	#X+=0.5
+	#Y+=0.5
+
 pygame.quit()

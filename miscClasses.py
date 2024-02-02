@@ -1,4 +1,4 @@
-from globals import FPS, SCREEN_X, SCREEN_Y
+from globals import FPS, screen_X, screen_Y
 import pygame
 #this file contains all small classes with less significant line size.
 

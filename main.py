@@ -26,9 +26,10 @@ leeevs = LeafSpawner(3000,scale)
 leafTicker = Ticker(float(5)) #x seconds between ticks
 money = MoneyCounter()
 moneyDisplay = TextDisplay(money.val, 10, 10)
+
 def tempFunc():
 	print("AHHHH PLEASE NO GOD NO!!!")
-testButton = Button(10, 10, 10, 10, tempFunc)
+testButton = Button(10, 10, 10, 10, (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), tempFunc)
 
 #adds the player to the leafBlowers (entities) list.
 leeevs.leafBlowers.append([guy.centerpos, guy.size, guy.power]) #Vector2(xpos, ypos), size

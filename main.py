@@ -2,6 +2,7 @@ import pygame
 import random
 import math
 from buttons import Button
+from drone import Drone
 from pygame.math import Vector2
 from globals import screen_X, screen_Y, FPS, FULLSCREEN_X, FULLSCREEN_Y
 from leaf import LeafSpawner, Blower
@@ -12,7 +13,7 @@ pygame.init()
 #creates game screen and caption
 X = 1
 Y = 1
-screen = pygame.display.set_mode((screen_X, screen_Y), pygame.SCALED, vsync=1)#, pygame.FULLSCREEN)
+screen = pygame.display.set_mode((screen_X, screen_Y),  pygame.FULLSCREEN, pygame.SCALED, vsync=1)
 pygame.display.set_caption("leaves")
 
 #calculate scale
@@ -23,6 +24,7 @@ doExit = False #variable to quit out of game loop
 clock = pygame.time.Clock() #sets up a game clock to regulate game speed
 
 guy = Player(scale)
+drone1 = Drone(screen_X/2, screen_Y/2,scale)
 leeevs = LeafSpawner(700,scale)
 
 leafTicker = Ticker(float(5)) #x seconds between ticks
@@ -30,16 +32,17 @@ money = MoneyCounter()
 moneyDisplay = TextDisplay(money.val, 10, 10)
 def tempFunc():
 	print("AHHHH PLEASE NO GOD NO!!!")
-testButton = Button(10, 10, 10, 10, tempFunc)
+testButton = Button(10, 10, 10, 10, pygame.image.load('resources/guyNice.png'), tempFunc)
 
 #adds the player to the leafBlowers (entities) list.
 leeevs.leafBlowers.append(Blower(guy.centerpos, guy.size, guy.power)) #Vector2(xpos, ypos), size
+leeevs.leafBlowers.append(Blower(drone1.pos, drone1.size, drone1.power))
 # for i in range(20):
 # 	leeevs.leafBlowers.append([Vector2(random.randint(0, screen_X), random.randint(0, screen_Y)), 100])
 
 center = pygame.display.get_window_size()
-pygame.mouse.set_pos(center[0]//2,center[1]//2)		
-pygame.mouse.set_visible(False)
+pygame.mouse.set_pos(center[0]//2,center[1]//2)
+#pygame.mouse.set_visible(False)
 
 #game loop
 while not doExit:
@@ -57,6 +60,7 @@ while not doExit:
 
 	#update functions
 	guy.update(delta,screen)
+	drone1.update(screen)
 	leeevs.update(delta, screen)
 	money.val += leeevs.frameMoney
 	moneyDisplay.update(screen, money.val)

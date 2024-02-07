@@ -36,6 +36,8 @@ testButton = Button(10, 10, 10, 10, pygame.image.load('resources/guyNice.png'), 
 
 #adds the player to the leafBlowers (entities) list.
 leeevs.leafBlowers.append(Blower(guy.centerpos, guy.size, guy.power)) #Vector2(xpos, ypos), size
+
+#for drone in range(10):
 leeevs.leafBlowers.append(Blower(drone1.pos, drone1.size, drone1.power))
 # for i in range(20):
 # 	leeevs.leafBlowers.append([Vector2(random.randint(0, screen_X), random.randint(0, screen_Y)), 100])

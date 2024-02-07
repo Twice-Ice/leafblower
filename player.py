@@ -13,11 +13,15 @@ class Player:
 	def __init__(self,scale):
 
 		self.baseImage = pygame.image.load('resources/guyNice.png')
-		self.defaultSizeImage = pygame.transform.smoothscale_by(self.baseImage, 128/self.baseImage.get_rect().height)
+		self.baseBlow = pygame.image.load('resources/bigfist.png')
+		self.defaultSizeImage = pygame.transform.smoothscale_by(self.baseImage,96/self.baseImage.get_rect().height)
+		self.defaultSizeBlower = pygame.transform.smoothscale_by(self.baseBlow, 75/self.baseBlow.get_rect().width)
 		self.image = pygame.transform.smoothscale_by(self.defaultSizeImage,scale)
+		self.blowImage = pygame.transform.smoothscale_by(self.defaultSizeBlower,scale)
 		self.transformed_image = pygame.transform.rotate(self.image, 0)
+		self.transformed_blower = pygame.transform.rotate(self.blowImage, 0)
 
-		self.size = self.image.get_rect().height+20
+		self.size = self.image.get_rect().height+40
 		self.power = 500#.36
 
 		#self.pos = Vector2(0,0)
@@ -75,11 +79,14 @@ class Player:
 		self.rotate()
 		self.draw(screen)
 
+	def upgrade():
+		pass
 	def rotate(self):
 		var = 6
 		angle = math.degrees(math.atan2(-self.vel.y, self.vel.x)) - self.correctionangle
 
 		self.transformed_image = pygame.transform.rotate(self.image, angle)
+		self.transformed_blower = pygame.transform.rotate(self.blowImage, angle)
 		
 		# if abs(self.vel.x) > 0 and abs(self.vel.y) > 0:
 		# 	#STUPID ANGLE STUFFF!!!!!!!! -90 = 270 so ive gotta do some scuffed code
@@ -115,7 +122,16 @@ class Player:
 	def draw(self,screen):
 		rect_to_draw = Rect(self.transformed_image.get_rect())
 		rect_to_draw.center = (int(self.newMousePos.x), int(self.newMousePos.y))
+
+		rect_to_blow = Rect(self.transformed_blower.get_rect())
+		rect_to_blow.center = (int(self.newMousePos.x), int(self.newMousePos.y))
+
+		screen.blit(
+			self.transformed_blower,
+			rect_to_blow
+		)
 		screen.blit(
 			self.transformed_image,
 			rect_to_draw 
 		)
+		

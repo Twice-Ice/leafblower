@@ -23,6 +23,3 @@ class Button:
 			for event in pygame.event.get(): #loops through the frame's events.
 				if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: #if the left mouse button was pressed (event.button 1 is lmb).
 					self.clickFunc() #calls the function for when the button is clicked.
-	
-	
-

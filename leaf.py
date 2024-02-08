@@ -1,135 +1,149 @@
+#type: strict
 import pygame
 import random
 import math
-from globals import SCREEN_X, SCREEN_Y, FPS
-from miscClasses import MoneyCounter
-from pygame import mixer
-from player import Player
+from globals import screen_X, screen_Y
 from pygame.math import Vector2
-pygame.init
+from pygame.color import Color
 
-#constants because why not.
-X = 0
-Y = 1
-DELTA_X = 2
-DELTA_Y = 3
-SPEED = 4
-COLOR = 5
+LEAF_DRAG = 2
+LEAF_WEIGHT = 0.02
+BLOWER_FALLOFF = 0.5 # 1 is linear
 
-# guy = Player()
+class Blower:
+	pos: Vector2
+	size: float
+	power: float
+
+	def __init__(self, pos: Vector2, size: float, power: float):
+		self.pos = pos
+		self.size = size
+		self.power = power
+ 
+class Leaf:
+	pos: Vector2
+	vel: Vector2
+	color: Color
+	size: float
+
+	def __init__(self, pos: Vector2, color: Color, size: float):
+		self.pos = pos
+		self.vel = Vector2(0, 0)
+		self.color = color
+		self.size = size
+
+	def draw(self, screen: pygame.Surface):
+		pygame.draw.circle(screen, self.color, self.pos, self.size)
+
+	def update(self, delta: float):
+		self.pos += self.vel * delta
+
+	def applyForce(self, force: Vector2, delta: float):
+		'''Applies `force` to the leaf. The force is measured in pixels/sec^2. This meant is for forces applied on every frame!'''
+		self.vel += force / LEAF_WEIGHT * delta
+
 class LeafSpawner:
 	STARTING_SPEED = 0.1
-	def __init__(self, leaves,scale):
+	def __init__(self, leaves: int, scale: float):
 		self.frameMoney = 0
-		self.leafBlowers = []
-		self.leaves = [] #this list contains information regarding every single leaf in the game.
+		self.leafBlowers: list[Blower] = []
+		self.leaves: list[Leaf] = [] #this list contains every single leaf in the game.
 		self.scale = scale
-		for i in range(leaves): #creates a 2d list containing each leaf.
-			tempX = 0
-			tempY = 10
-			self.leaves.append([ random.randint(0,SCREEN_X) + tempX, random.randint(0,SCREEN_Y)+ tempY, 0, 0, self.STARTING_SPEED, (random.randint(155, 255), random.randint(0, 155), 0)]) #xpos, ypos, xvelo, yvelo, speed, color
+		for _ in range(leaves): #creates a list containing each leaf.
+			self.leaves.append(
+				Leaf(
+					Vector2(
+						random.randint(50, screen_X-50), 
+						random.randint(50, screen_Y-50)
+					), 
+					Color(
+						random.randint(155, 255), 
+						random.randint(0, 155), 
+						0
+					),
+					8 * self.scale
+				)
+			)
 
-	def draw(self, leafPos, screen):
-		if leafPos == 1: #since the leaves are autumn colors now, this will just be white.
-			pygame.draw.circle(screen, (255, 255, 255), (self.leaves[leafPos][X], self.leaves[leafPos][Y]), 8*self.scale)
-		else:
-			pygame.draw.circle(screen, self.leaves[leafPos][COLOR], (self.leaves[leafPos][X], self.leaves[leafPos][Y]), 8*self.scale)
-
-	def update(self, delta, screen):
+	def update(self, delta: float, screen: pygame.Surface):
 		#delta is calculated using the framerate. Applying delta to (for example) movement, means the leaves will stay the same speed even if fps drops, rather than slowing down
 		self.frameMoney = 0  #resets frame money every frame.
 		# print(self.leaves[1])
-		for leafPos in range(len(self.leaves)): #goes through each leaf in the leaves list.
-			if self.leaves[leafPos][X] < SCREEN_X + 10 and self.leaves[leafPos][X] > -10 and self.leaves[leafPos][Y] < SCREEN_Y + 10 and self.leaves[leafPos][Y] > -10: # doesn't update the leaf if it's outside of the screen.
-				self.applyPhysics(leafPos,delta)
-				self.draw(leafPos, screen) #only draws the leaf if it's on screen.
-			elif self.leaves[leafPos][X] != -69 and self.leaves[leafPos][Y] != -420: #collects the leaf (assuming it's not already collected), because it's not on screen.
-				self.collectLeaf(leafPos)
+		for leaf in self.leaves: #goes through each leaf in the leaves list.
+			if leaf.pos.x < screen_X + 10 and leaf.pos.x > -10 and leaf.pos.y < screen_Y + 10 and leaf.pos.y > -10: # doesn't update the leaf if it's outside of the screen.
+				self.applyPhysics(leaf, delta)
+				leaf.draw(screen)
+			elif leaf.pos.x != -69 and leaf.pos.y != -420: #collects the leaf (assuming it's not already collected), because it's not on screen.
+				self.collectLeaf(leaf)
 
-	def applyPhysics(self, leafPos,delta):
-		for j in range(len(self.leafBlowers)): #cycles through all leafblowers
+	def applyPhysics(self, leaf: Leaf, delta: float):
+		for blower in self.leafBlowers: #cycles through all leafblowers
 			#calculates hypotenuse (distance) between the leafblower and the leaf
-			leafDistance = math.sqrt((self.leafBlowers[j][0].x - self.leaves[leafPos][X]) ** 2 + abs(self.leafBlowers[j][0].y - self.leaves[leafPos][Y]) ** 2)
+			leafDistance = (blower.pos - leaf.pos).length()
 
-			if leafDistance <= self.leafBlowers[j][1]: #checks if the leaf is in the range of the current leafblower
-				if leafDistance == 0: #if the leaf is too close, it is offset in order to avoid leaves getting stuck at the center of a leafblower.
-					leafDistance = .01
-					self.leaves[leafPos][X] += 0.01
-				#Finds the angle between leaf & leafblower
-				angle = math.atan2(float(self.leaves[leafPos][Y] - self.leafBlowers[j][0].y), float(self.leaves[leafPos][X] - self.leafBlowers[j][0].x))
+			if leafDistance <= blower.size: #checks if the leaf is in the range of the current leafblower
+				# if leafDistance == 0: #if the leaf is too close, it is offset in order to avoid leaves getting stuck at the center of a leafblower.
+				# 	leafDistance = .01
+				# #Finds the angle between leaf & leafblower
+				# angle = math.atan2(float(leaf.pos.y - blower.pos.y), float(leaf.pos.x - blower.pos.x))
 
-				#Convert that angle to coordinates, extend to the correct size so that it picks a point along the leafblower's bounds
-				endX = int((math.cos(angle) * self.leafBlowers[j][1]) + self.leafBlowers[j][0].x)
-				endY = int((math.sin(angle) * self.leafBlowers[j][1]) + self.leafBlowers[j][0].y)
+				# #Convert that angle to coordinates, extend to the correct size so that it picks a point along the leafblower's bounds
+				# endX = int((math.cos(angle) * blower.size) + blower.pos.x)
+				# endY = int((math.sin(angle) * blower.size) + blower.pos.y)
 
-				#Linear algebra stuff, takes the distance between the current and end position, converts that to a ratio that can be used to make leaves move at a constant speed
-				xDistance = endX - self.leaves[leafPos][X]
-				yDistance = endY - self.leaves[leafPos][Y]
-				magnitude = math.sqrt((xDistance)**2 + (yDistance)**2)
-				if magnitude == 0:
-					#Prevent divide by zero error
-					magnitude = 0.01
-				yDir = yDistance/magnitude
-				xDir = xDistance/magnitude
+				# #Linear algebra stuff, takes the distance between the current and end position, converts that to a ratio that can be used to make leaves move at a constant speed
+				# xDistance = endX - leaf.pos.x
+				# yDistance = endY - leaf.pos.y
+				# magnitude = math.sqrt((xDistance)**2 + (yDistance)**2)
+				# if magnitude == 0:
+				# 	#Prevent divide by zero error
+				# 	magnitude = 0.01
+				# yDir = yDistance/magnitude
+				# xDir = xDistance/magnitude
 
-				self.leaves[leafPos][SPEED] += self.leafBlowers[j][2] #default power = .2 (?)
+				blowDirection = ((leaf.pos - blower.pos).normalize() if leaf.pos != blower.pos else Vector2(0, 0))
+				normalizedDist = leafDistance / blower.size
+
+				blowSpeed = 1 - normalizedDist**BLOWER_FALLOFF
+				blowForce = blowDirection * blowSpeed * blower.power
+
+
+				leaf.applyForce(blowForce, delta) #default power = .2 (?)
 
 				#sets the velocities
-				self.leaves[leafPos][DELTA_X] = (xDir * self.leaves[leafPos][SPEED])*self.scale
-				self.leaves[leafPos][DELTA_Y] = (yDir * self.leaves[leafPos][SPEED])*self.scale
+				# leaf.vel = (xDir * leaf[SPEED])*self.scale
 		
 		#applies drag
-		self.drag(leafPos)
+		self.drag(leaf, delta)
 
 		#moves the leaf
-		self.leaves[leafPos][X] += self.leaves[leafPos][DELTA_X] / delta
-		self.leaves[leafPos][Y] += self.leaves[leafPos][DELTA_Y] / delta
+		leaf.pos += leaf.vel * delta
 
 		#screen wrapping stuff because funny inifinite pain with leaves go brrrrr
-		#if self.leaves[leafPos][X] < 0:
-		#	self.leaves[leafPos][X] += SCREEN_X
-		#elif self.leaves[leafPos][X] > SCREEN_X:
-		#	self.leaves[leafPos][X] -= SCREEN_X
+		#if leaf[X] < 0:
+		#	leaf[X] += screen_X
+		#elif leaf[X] > screen_X:
+		#	leaf[X] -= screen_X
 
-		#if self.leaves[leafPos][Y] < 0:
-		#	self.leaves[leafPos][Y] += SCREEN_Y
-		#elif self.leaves[leafPos][Y] > SCREEN_Y:
-		#	self.leaves[leafPos][Y] -= SCREEN_Y
+		#if leaf[Y] < 0:
+		#	leaf[Y] += screen_Y
+		#elif leaf[Y] > screen_Y:
+		#	leaf[Y] -= screen_Y
 
-	def drag(self, leafPos):
-		#keep dragVal below minSpeed or else small shaking visual bug.
-		dragVal = 0.25
-		minSpeed = 0.4
+	def drag(self, leaf: Leaf, delta: float):
+		leaf.vel *= 1 - (LEAF_DRAG * delta)
 
-		#if the leaf isn't still, and it's not below the minimum speed,
-		#then it will be reduced by some fancy math that just determines whether or not DELTA_X/Y is pos/neg and applies the inverse.
-
-		if self.leaves[leafPos][DELTA_X] != 0:
-			if abs(self.leaves[leafPos][DELTA_X]) <= minSpeed:
-				self.leaves[leafPos][DELTA_X] = 0
-			else:
-				self.leaves[leafPos][DELTA_X] += (dragVal * ((self.leaves[leafPos][DELTA_X]/abs(self.leaves[leafPos][DELTA_X])) * -1))#*self.scale
-
-		if self.leaves[leafPos][DELTA_Y] != 0:
-			if abs(self.leaves[leafPos][DELTA_Y]) <= minSpeed:
-				self.leaves[leafPos][DELTA_Y] = 0
-			else:
-				self.leaves[leafPos][DELTA_Y] += (dragVal * ((self.leaves[leafPos][DELTA_Y]/abs(self.leaves[leafPos][DELTA_Y])) * -1))#*self.scale
-
-	def collectLeaf(self, leafPos):
+	def collectLeaf(self, leaf: Leaf):
 		#the leaf goes to an arbitrary position that would otherwise be impossible to reach for the leaf.
 		#This is used in self.respawnLeaves() as a way of checking if the leaf was collected previously or not without using another variable in the leaf's list.
-		self.leaves[leafPos][X] = -69
-		self.leaves[leafPos][Y] = -420
+		leaf.pos = Vector2(-69, -420)
 		self.frameMoney += 1
 
 	def respawnLeaves(self):
 		adjustor = random.randint(1, 4)
-		for i in range(len(self.leaves)): #checks all the leaves
-			if (self.leaves[i][X] == -69 and self.leaves[i][Y] == -420): #or (i + adjustor) % 4 == 0: #if the leaf is collected or every 4th leaf, it is moved to a random pos and it's velo is reset.
+		for leaf in self.leaves: #checks all the leaves
+			if (leaf.pos.x == -69 and leaf.pos.y == -420): #or (i + adjustor) % 4 == 0: #if the leaf is collected or every 4th leaf, it is moved to a random pos and it's velo is reset.
 				#it's every 4th leaf in order to avoid clumping, or all the leaves being out of reach of the player. this allows for afk time.
-				self.leaves[i][X] = random.randint(50, SCREEN_X-50)
-				self.leaves[i][Y] = random.randint(50, SCREEN_Y-50)
-				self.leaves[i][DELTA_X] = 0
-				self.leaves[i][DELTA_Y] = 0
-				self.leaves[i][SPEED] = 0
+				leaf.pos.x = random.randint(50, screen_X-50)
+				leaf.pos.y = random.randint(50, screen_Y-50)
+				leaf.vel = Vector2(0, 0)

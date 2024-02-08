@@ -22,12 +22,12 @@ class Menu:
         else:
             self.active = True
 
-    def update(self, screen):
+    def update(self, screen, mousePos):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
-            self.activate() #this makes it so that if the escape key is pressed, the menu closes
+            self.active = False #this makes it so that if the escape key is pressed, the menu closes
 
         if self.active: #if it's active, it runs draws and updates the menu
             pygame.draw.rect(screen, self.color, self.rect)
             for button in range(len(self.buttonsList)): #goes through the list of buttons for this menu and updates + draws them
-                self.buttonsList[button].update(screen)
+                self.buttonsList[button].update(screen, mousePos)

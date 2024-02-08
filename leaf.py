@@ -101,7 +101,14 @@ class LeafSpawner:
 				# yDir = yDistance/magnitude
 				# xDir = xDistance/magnitude
 
-				blowDirection = ((leaf.pos - blower.pos).normalize() if leaf.pos != blower.pos else Vector2(0, 0))
+				
+				"""
+				The folowing notes are from Tess, I'm trying to write down and understand how this math works.
+				If the leaf pos doesn't equal the blower's position, then the blow direction is set to a vector2 normalized between leaf pos and blower pos.
+				Normalize returns a value between 0 and 1.
+				If the leaf pos == the blower pos, then the blow direction is set to 0, 0.
+				""" 
+				blowDirection = ((leaf.pos - blower.pos).normalize() if leaf.pos != blower.pos else Vector2(0, 0)) 
 				normalizedDist = leafDistance / blower.size
 
 				blowSpeed = 1 - normalizedDist**BLOWER_FALLOFF

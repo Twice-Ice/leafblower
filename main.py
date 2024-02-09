@@ -44,12 +44,11 @@ for drone in range(10):
 	droneList.append(Drone(random.randint(0, screen_X), random.randint(0, screen_Y), scale))
 	leeevs.leafBlowers.append(Blower(droneList[drone].pos, droneList[drone].size, droneList[drone].power))
 
-#a list that can hold all menus in the game.
-menuList = []
-menuButtonsList = []
-menuRect = Rect(10, 10, screen_X-20, screen_Y-20)
-testMenu = Menu(menuRect, (155, 155, 155), [
-	Button(50, 50, 50, 50, (255, 255, 255), tempFunc)
+
+menuList = [] #contains all menus
+menuButtonsList = [] #contains all activating buttons for said menus
+testMenu = Menu(Rect(10, 10, screen_X-20, screen_Y-20), (155, 155, 155), [
+	[Button(50, 50, 50, 50, (255, 255, 255), tempFunc), [TextDisplay("Button Button Button", 120, 50), TextDisplay("Other temp text test", 120, 100)]]
 ])
 testMenuButton = Button(screen_Y-50, 15, 50, 50, (255, 255, 255), testMenu.activate)
 menuList.append(testMenu)
@@ -82,8 +81,8 @@ while not doExit:
 	moneyDisplay.update(screen, money.val)
 	testButton.update(screen, Vector2(pygame.mouse.get_pos()))
 	for menu in range(len(menuList)): #should always be drawing menus last so that they are on top of everything.
-		menuButtonsList[menu].update(screen, Vector2(pygame.mouse.get_pos()))
-		menuList[menu].update(screen, Vector2(pygame.mouse.get_pos()))
+		menuButtonsList[menu].update(screen, Vector2(pygame.mouse.get_pos())) #list containing all activating menu buttons.
+		menuList[menu].update(screen, Vector2(pygame.mouse.get_pos())) #list containing all menus
 
 	pygame.display.flip() #update graphics each game loop
 

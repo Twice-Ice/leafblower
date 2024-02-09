@@ -26,16 +26,19 @@ class MoneyCounter:
 		self.val += addValue
 
 class TextDisplay:
-	def __init__(self, text, x, y):
+	def __init__(self, text, x, y, font = None):
 		if text == None: text = ""
 		self.text = text
 		self.x = x
 		self.y = y
+		self.font = font #not set up. don't use different fonts.
 
-	def update(self, screen, text):
+	def update(self, screen, text = "None"):
+		if not text == "None":
+			self.text = text
 		font = pygame.font.Font(None, 74)
-		text = font.render(str(text), 1, (255, 255, 255))
-		screen.blit(text, (self.x, self.y))
+		renderedText = font.render(str(self.text), 1, (255, 255, 255))
+		screen.blit(renderedText, (self.x, self.y))
 			
 #temporary player class containing positions because player class doesn't work right now.
 class Temp:

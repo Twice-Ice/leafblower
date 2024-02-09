@@ -2,6 +2,8 @@ import pygame
 from pygame import Vector2
 from buttons import Button
 
+BUTTONS = 0
+TEXT = 1
 class Menu:
     """
     each menu needs to be set to a button that activates it.
@@ -30,4 +32,7 @@ class Menu:
         if self.active: #if it's active, it runs draws and updates the menu
             pygame.draw.rect(screen, self.color, self.rect)
             for button in range(len(self.buttonsList)): #goes through the list of buttons for this menu and updates + draws them
-                self.buttonsList[button].update(screen, mousePos)
+                self.buttonsList[button][BUTTONS].update(screen, mousePos)
+                if type(self.buttonsList[button][TEXT]) == list:
+                    for text in range(len(self.buttonsList[button][TEXT])):
+                        self.buttonsList[button][TEXT][text].update(screen)

@@ -135,5 +135,9 @@ class Player:
 			rect_to_draw 
 		)
 		
-	# def upgradeBlowerPower():
+	def upgradeBlowerPower(self):
+		self.power += 500
+		print(self.power)
 
+	def upgradeBlowerSize(self):
+		self.size += 25

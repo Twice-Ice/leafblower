@@ -44,12 +44,9 @@ for drone in range(10):
 	droneList.append(Drone(random.randint(0, screen_X), random.randint(0, screen_Y), scale))
 	leeevs.leafBlowers.append(Blower(droneList[drone].pos, droneList[drone].size, droneList[drone].power))
 
-
 menuList = [] #contains all menus
 menuButtonsList = [] #contains all activating buttons for said menus
-testMenu = Menu(Rect(10, 10, screen_X-20, screen_Y-20), (155, 155, 155), [
-	[Button(50, 50, 50, 50, (255, 255, 255), tempFunc), [TextDisplay("Button Button Button", 120, 50), TextDisplay("Other temp text test", 120, 100)]]
-])
+testMenu = Menu(Rect(10, 10, screen_X-20, screen_Y-20), (155, 155, 155), [Button(50, 50, 50, 50, (255, 255, 255), tempFunc)], [[money.val, 120, 50], ["temp text", 120, 100]])
 testMenuButton = Button(screen_Y-50, 15, 50, 50, (255, 255, 255), testMenu.activate)
 menuList.append(testMenu)
 menuButtonsList.append(testMenuButton)
